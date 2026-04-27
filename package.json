@@ -1,0 +1,15 @@
+{
+  "name": "blog-production",
+  "private": true,
+  "packageManager": "pnpm@9.12.3",
+  "scripts": {
+    "dev": "pnpm --filter @blog/web dev",
+    "build": "pnpm --filter @blog/web build",
+    "start": "pnpm --filter @blog/web start",
+    "lint": "pnpm --filter @blog/web lint",
+    "typecheck": "pnpm --filter @blog/web typecheck",
+    "test": "pnpm --filter @blog/web test",
+    "prisma:migrate": "pnpm --filter @blog/web prisma migrate dev",
+    "prisma:seed": "pnpm --filter @blog/web prisma db seed"
+  }
+}

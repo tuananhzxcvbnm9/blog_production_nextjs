@@ -1,0 +1,11 @@
+image:
+  repository: your-prod-registry/blog-web
+  tag: "CHANGE_ME"
+ingress:
+  host: blog.your-domain.com
+secrets:
+  DATABASE_URL: postgresql://...
+  AUTH_SECRET: change-me
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/blog-web-irsa

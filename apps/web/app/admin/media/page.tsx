@@ -1,0 +1,2 @@
+import { prisma } from '@/lib/prisma';
+export default async function MediaAdmin(){ const media=await prisma.media.findMany({orderBy:{createdAt:'desc'},take:50}); return <div><h1 className="text-2xl font-bold">Media</h1><div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">{media.map(m=><div key={m.id} className="rounded border p-2"><p className="truncate text-xs">{m.filename}</p><a href={m.url} className="text-xs text-blue-600">Open</a></div>)}</div></div>;}

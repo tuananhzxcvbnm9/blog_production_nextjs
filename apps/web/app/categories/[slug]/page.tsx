@@ -1,0 +1,3 @@
+import { prisma } from '@/lib/prisma';
+import { notFound } from 'next/navigation';
+export default async function CategoryPage({ params }: { params: { slug: string } }) { const category=await prisma.category.findUnique({where:{slug:params.slug}}); if(!category) notFound(); const posts=await prisma.post.findMany({where:{categoryId:category.id,status:'PUBLISHED'},include:{category:true,author:true}}); return <div><h1 className="text-3xl font-bold">{category.name}</h1><p>{category.description}</p><div className="mt-4 grid gap-3">{posts.map(p=><a key={p.id} href={`/posts/${p.slug}`} className="rounded border p-3">{p.title}</a>)}</div></div>; }
