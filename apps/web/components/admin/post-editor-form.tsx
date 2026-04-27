@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo, useState, type ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -45,6 +46,13 @@ export function PostEditorForm({ mode, postId, categories, initialValues }: Prop
     [initialValues, categories]
   );
 
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { isSubmitting }
+  } = useForm<PostEditorValues>({ defaultValues });
   const { register, handleSubmit, watch, setValue, formState: { isSubmitting } } = useForm<PostEditorValues>({ defaultValues });
   const titleValue = watch('title');
 
@@ -101,6 +109,9 @@ export function PostEditorForm({ mode, postId, categories, initialValues }: Prop
         <Field label="Danh mục">
           <select {...register('categoryId', { required: true })} className="w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2 text-sm outline-none focus:border-blue-400 dark:border-zinc-700">
             {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
               <option key={category.id} value={category.id}>{category.name}</option>
             ))}
           </select>
@@ -156,6 +167,7 @@ export function PostEditorForm({ mode, postId, categories, initialValues }: Prop
   );
 }
 
+function Field({ label, children }: { label: string; children: ReactNode }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block space-y-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">
