@@ -9,7 +9,8 @@ const COOKIE_NAME = 'blog_session';
 export type SessionPayload = { userId: string; role: UserRole; email: string };
 
 export async function loginWithEmailPassword(email: string, password: string) {
-  const user = await prisma.user.findUnique({ where: { email } });
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
   if (!user || user.status !== 'ACTIVE') return null;
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) return null;
