@@ -1,0 +1,76 @@
+import Link from 'next/link';
+import { PenLine, Search } from 'lucide-react';
+import { ThemeToggle } from './theme-toggle';
+
+const navItems = [
+  { href: '/', label: 'Khám phá' },
+  { href: '/categories/engineering', label: 'Chủ đề' },
+  { href: '/search', label: 'Tìm kiếm' },
+  { href: '/about', label: 'Giới thiệu' }
+];
+
+export function Header() {
+  return (
+    <header className="sticky top-0 z-40 border-b border-white/60 bg-white/75 backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/70">
+      <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-3 md:gap-6">
+        <Link href="/" className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-lg font-extrabold text-transparent md:text-2xl">
+          NOVA FLOW
+        </Link>
+
+        <nav className="hidden items-center gap-6 md:flex">
+          {navItems.map((item) => (
+            <Link key={item.href} href={item.href} className="text-sm font-medium text-zinc-600 transition hover:text-blue-600 dark:text-zinc-300">
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="ml-auto hidden items-center gap-2 rounded-2xl border border-blue-100 bg-white/90 px-3 py-2 md:flex dark:border-zinc-800 dark:bg-zinc-900">
+          <Search size={16} className="text-zinc-400" />
+          <input
+            aria-label="Search"
+            className="w-56 bg-transparent text-sm outline-none placeholder:text-zinc-400"
+            placeholder="Tìm bài viết, chủ đề..."
+          />
+        </div>
+
+        <ThemeToggle />
+
+        <Link
+          href="/admin/posts/new"
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:-translate-y-0.5"
+        >
+          <PenLine size={14} />
+          <span className="hidden sm:inline">Viết bài</span>
+        </Link>
+      </div>
+    </header>
+  );
+}
+
+export function Footer() {
+  return (
+    <footer className="mt-20 border-t border-zinc-200/80 bg-white/70 dark:border-zinc-800 dark:bg-zinc-950/80">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-3">
+        <div>
+          <p className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-xl font-bold text-transparent">NOVA FLOW</p>
+          <p className="mt-2 text-sm text-zinc-500">Nền tảng blog hiện đại cho Engineering, Product, Lifestyle.</p>
+        </div>
+        <div className="text-sm text-zinc-500">
+          <p className="mb-2 font-semibold text-zinc-700 dark:text-zinc-200">Quick links</p>
+          <div className="space-y-1">
+            <p>Home</p>
+            <p>Categories</p>
+            <p>Authors</p>
+            <p>Newsletter</p>
+          </div>
+        </div>
+        <div className="text-sm text-zinc-500">
+          <p className="mb-2 font-semibold text-zinc-700 dark:text-zinc-200">Social</p>
+          <p>X / LinkedIn / GitHub</p>
+          <p className="mt-4">© {new Date().getFullYear()} Nova Flow.</p>
+        </div>
+      </div>
+    </footer>
+  );
+}

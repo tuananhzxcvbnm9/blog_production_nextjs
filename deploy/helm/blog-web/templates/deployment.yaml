@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "blog-web.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "blog-web.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "blog-web.fullname" . }}
+    spec:
+      serviceAccountName: {{ include "blog-web.serviceAccountName" . }}
+      containers:
+        - name: web
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+          envFrom:
+            - configMapRef: { name: {{ include "blog-web.fullname" . }}-config }
+            - secretRef: { name: {{ include "blog-web.fullname" . }}-secret }
+          readinessProbe:
+            httpGet: { path: /api/health, port: {{ .Values.containerPort }} }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /api/health, port: {{ .Values.containerPort }} }
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+          resources:
+{{ toYaml .Values.resources | indent 12 }}

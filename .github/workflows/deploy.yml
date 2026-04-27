@@ -1,0 +1,31 @@
+name: CI-CD
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile=false
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm build
+      - name: Docker login
+        run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.IMAGE_REGISTRY }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+      - name: Build and push image
+        run: |
+          IMAGE_TAG=${GITHUB_SHA::7}
+          docker build -f apps/web/Dockerfile -t ${{ secrets.IMAGE_REGISTRY }}/blog-web:${IMAGE_TAG} .
+          docker push ${{ secrets.IMAGE_REGISTRY }}/blog-web:${IMAGE_TAG}
+      - name: Helm deployment command
+        run: |
+          echo "helm upgrade --install blog-web deploy/helm/blog-web -f deploy/helm/blog-web/values.prod.yaml --set image.repository=${{ secrets.IMAGE_REGISTRY }}/blog-web --set image.tag=${GITHUB_SHA::7}"

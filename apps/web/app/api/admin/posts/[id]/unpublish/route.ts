@@ -1,0 +1,2 @@
+import { NextResponse } from 'next/server'; import { prisma } from '@/lib/prisma'; import { requireRole } from '@/lib/auth';
+export async function POST(_:Request,{params}:{params:{id:string}}){ try{ await requireRole(['ADMIN','EDITOR']); await prisma.post.update({where:{id:params.id},data:{status:'DRAFT'}}); return NextResponse.json({ok:true}); } catch { return NextResponse.json({error:'Forbidden'},{status:403}); } }
