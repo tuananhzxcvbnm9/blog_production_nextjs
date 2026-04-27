@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { LogOut, PenLine, ShieldAlert } from 'lucide-react';
+import { LogOut, PenLine } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -73,6 +74,7 @@ export function HeaderAuthActions() {
 
   if (state.status === 'loading') {
     return <div className="h-10 w-44 animate-pulse rounded-xl bg-zinc-200/80 dark:bg-zinc-800" aria-label="Đang tải trạng thái tài khoản" />;
+    return <div className="h-10 w-36 animate-pulse rounded-xl bg-zinc-200/80 dark:bg-zinc-800" aria-label="Đang tải trạng thái tài khoản" />;
   }
 
   if (state.status === 'error') {
@@ -128,6 +130,15 @@ export function HeaderAuthActions() {
           Chưa có quyền admin
         </span>
       )}
+  return (
+    <div className="flex items-center gap-2">
+      <Link
+        href="/admin/posts/new"
+        className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:-translate-y-0.5"
+      >
+        <PenLine size={14} />
+        <span className="hidden sm:inline">Viết bài</span>
+      </Link>
 
       <button
         onClick={onLogout}
