@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { PostCard } from '@/components/post-card';
 import { HomeFeed } from '@/components/home/home-feed';
+import Link from 'next/link';
 import { Sparkles, TrendingUp, Users, BookOpenText } from 'lucide-react';
 
 const topicPills = ['Tất cả', 'AI', 'Công nghệ', 'Thiết kế', 'Productivity', 'Cloud & DevOps', 'Lifestyle', 'Startup'];
@@ -27,6 +28,21 @@ export default async function HomePage() {
             Nguồn cảm hứng <span className="bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">không giới hạn</span>
           </h1>
           <p className="max-w-2xl text-lg text-zinc-500 dark:text-zinc-300">Khám phá ý tưởng, xu hướng và tri thức mới nhất để bứt phá trong công việc mỗi ngày.</p>
+
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/login"
+              className="rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:opacity-90"
+            >
+              Đăng nhập
+            </Link>
+            <Link
+              href="/register"
+              className="rounded-xl border border-zinc-200 bg-white px-5 py-2.5 text-sm font-semibold text-zinc-700 transition hover:border-blue-200 hover:text-blue-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+            >
+              Đăng ký
+            </Link>
+          </div>
 
           <div className="flex flex-wrap gap-3">
             {topicPills.map((pill, idx) => (

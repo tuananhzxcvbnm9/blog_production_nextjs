@@ -19,15 +19,6 @@ type AuthFormProps = {
   mode: AuthMode;
 };
 
-type LoginResponse = {
-  ok: boolean;
-  user?: {
-    userId: string;
-    email: string;
-    role: 'ADMIN' | 'EDITOR' | 'AUTHOR';
-  };
-};
-
 const authPageCopy: Record<
   AuthMode,
   {
@@ -97,9 +88,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       return;
     }
 
-    const payload = (await res.json().catch(() => null)) as LoginResponse | null;
-    const hasAdminPermission = payload?.user?.role === 'ADMIN' || payload?.user?.role === 'EDITOR';
-    router.push(hasAdminPermission ? '/admin' : '/');
+    router.push('/admin');
     router.refresh();
   };
 
