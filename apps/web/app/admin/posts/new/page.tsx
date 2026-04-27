@@ -1,8 +1,16 @@
-'use client';
+import { prisma } from '@/lib/prisma';
+import { PostEditorForm } from '@/components/admin/post-editor-form';
 
-import { useForm } from 'react-hook-form';
+export default async function NewPostPage() {
+  const categories = await prisma.category.findMany({ orderBy: { name: 'asc' } });
 
-export default function NewPostPage() {
-  const { register } = useForm();
-  return <div className="space-y-4"><h1 className="text-2xl font-bold">Create post</h1><form className="grid gap-3 rounded-xl border p-4"><input {...register('title')} placeholder="Title" className="rounded border px-3 py-2"/><textarea {...register('content')} placeholder="Content" className="min-h-40 rounded border px-3 py-2"/><button className="rounded bg-black py-2 text-white">Save draft</button></form></div>;
+  return (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-2xl font-bold">Tạo bài viết mới</h1>
+        <p className="text-sm text-zinc-500">Tạo nội dung, thêm metadata SEO và chọn workflow draft/publish.</p>
+      </div>
+      <PostEditorForm mode="create" categories={categories} />
+    </div>
+  );
 }

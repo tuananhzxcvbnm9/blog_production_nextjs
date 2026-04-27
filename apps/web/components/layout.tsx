@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { PenLine, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
+import { HeaderAuthActions } from './auth/header-auth-actions';
 
 const navItems = [
   { href: '/', label: 'Khám phá' },
@@ -35,14 +36,7 @@ export function Header() {
         </div>
 
         <ThemeToggle />
-
-        <Link
-          href="/admin/posts/new"
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:-translate-y-0.5"
-        >
-          <PenLine size={14} />
-          <span className="hidden sm:inline">Viết bài</span>
-        </Link>
+        <HeaderAuthActions />
       </div>
     </header>
   );
