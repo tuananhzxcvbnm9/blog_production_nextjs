@@ -16,7 +16,7 @@ Production-ready blog platform with modern public UI, protected admin, S3 direct
 - Modernized Nova Flow-inspired editorial UI: gradient hero, topic chips, rich cards, sticky glass header, dark-mode toggle, and client-side infinite loading with skeleton/empty/error states
 - SEO: dynamic metadata for post pages, sitemap, robots, JSON-LD article schema
 - Admin routes/layout: dashboard, posts, categories, tags, media, users, settings
-- API routes for public/admin/auth/media/health
+- API routes for public/admin/auth/media/health (bao gồm đăng nhập + đăng ký tài khoản tác giả)
 - API hardening update: stricter Zod validation for search/pagination/newsletter and admin CRUD payloads (categories/tags/users/settings)
 - Custom JWT cookie session auth + RBAC (ADMIN/EDITOR)
 - Prisma schema with indexes/relations + seed data
