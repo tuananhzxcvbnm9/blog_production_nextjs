@@ -15,6 +15,15 @@ type AuthFormData = {
   password: string;
 };
 
+type LoginResponse = {
+  ok: boolean;
+  user: {
+    userId: string;
+    email: string;
+    role: 'ADMIN' | 'EDITOR' | 'AUTHOR';
+  };
+};
+
 type AuthFormProps = {
   mode: AuthMode;
 };
@@ -88,7 +97,9 @@ export function AuthForm({ mode }: AuthFormProps) {
       return;
     }
 
-    router.push('/admin');
+    const payload = (await res.json()) as LoginResponse;
+    const canAccessAdmin = ['ADMIN', 'EDITOR'].includes(payload.user.role);
+    router.push(canAccessAdmin ? '/admin' : '/');
     router.refresh();
   };
 
