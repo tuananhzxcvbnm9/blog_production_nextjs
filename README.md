@@ -8,6 +8,7 @@ Production-ready blog platform with modern public UI, protected admin, S3 direct
 - `packages/ui`: shared UI package placeholder
 - `packages/config`: shared config package placeholder
 - `deploy/helm/blog-web`: Helm chart for deployment
+- `deploy/vm`: Docker + Nginx deployment assets for Ubuntu VM
 
 ## Features implemented
 
