@@ -1,4 +1,5 @@
-'use client';
+import { prisma } from '@/lib/prisma';
+import { PostEditorForm } from '@/components/admin/post-editor-form';
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
