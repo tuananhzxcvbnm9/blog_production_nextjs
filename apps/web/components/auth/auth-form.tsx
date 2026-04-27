@@ -15,17 +15,17 @@ type AuthFormData = {
   password: string;
 };
 
-type AuthFormProps = {
-  mode: AuthMode;
-};
-
 type LoginResponse = {
   ok: boolean;
-  user?: {
+  user: {
     userId: string;
     email: string;
     role: 'ADMIN' | 'EDITOR' | 'AUTHOR';
   };
+};
+
+type AuthFormProps = {
+  mode: AuthMode;
 };
 
 const authPageCopy: Record<
@@ -97,9 +97,9 @@ export function AuthForm({ mode }: AuthFormProps) {
       return;
     }
 
-    const payload = (await res.json().catch(() => null)) as LoginResponse | null;
-    const hasAdminPermission = payload?.user?.role === 'ADMIN' || payload?.user?.role === 'EDITOR';
-    router.push(hasAdminPermission ? '/admin' : '/');
+    const payload = (await res.json()) as LoginResponse;
+    const canAccessAdmin = ['ADMIN', 'EDITOR'].includes(payload.user.role);
+    router.push(canAccessAdmin ? '/admin' : '/');
     router.refresh();
   };
 

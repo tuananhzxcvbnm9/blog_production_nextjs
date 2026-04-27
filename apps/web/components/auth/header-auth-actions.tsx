@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { LogOut, PenLine, ShieldAlert } from 'lucide-react';
+import { LogOut, PenLine } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -16,12 +16,6 @@ type AuthState =
   | { status: 'error'; message: string }
   | { status: 'authenticated'; user: SessionUser }
   | { status: 'unauthenticated' };
-
-const roleLabelMap: Record<SessionUser['role'], string> = {
-  ADMIN: 'Admin',
-  EDITOR: 'Editor',
-  AUTHOR: 'Author'
-};
 
 export function HeaderAuthActions() {
   const router = useRouter();
@@ -72,7 +66,7 @@ export function HeaderAuthActions() {
   };
 
   if (state.status === 'loading') {
-    return <div className="h-10 w-44 animate-pulse rounded-xl bg-zinc-200/80 dark:bg-zinc-800" aria-label="Đang tải trạng thái tài khoản" />;
+    return <div className="h-10 w-36 animate-pulse rounded-xl bg-zinc-200/80 dark:bg-zinc-800" aria-label="Đang tải trạng thái tài khoản" />;
   }
 
   if (state.status === 'error') {
@@ -106,28 +100,15 @@ export function HeaderAuthActions() {
     );
   }
 
-  const canAccessAdmin = ['ADMIN', 'EDITOR'].includes(state.user.role);
-
   return (
     <div className="flex items-center gap-2">
-      <span className="hidden rounded-xl border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-600 md:inline-block dark:border-zinc-700 dark:text-zinc-300">
-        {roleLabelMap[state.user.role]}
-      </span>
-
-      {canAccessAdmin ? (
-        <Link
-          href="/admin/posts/new"
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:-translate-y-0.5"
-        >
-          <PenLine size={14} />
-          <span className="hidden sm:inline">Viết bài</span>
-        </Link>
-      ) : (
-        <span className="hidden items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 md:inline-flex dark:border-amber-900/80 dark:bg-amber-950/40 dark:text-amber-300">
-          <ShieldAlert size={14} />
-          Chưa có quyền admin
-        </span>
-      )}
+      <Link
+        href="/admin/posts/new"
+        className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:-translate-y-0.5"
+      >
+        <PenLine size={14} />
+        <span className="hidden sm:inline">Viết bài</span>
+      </Link>
 
       <button
         onClick={onLogout}
