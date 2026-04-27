@@ -1,0 +1,48 @@
+replicaCount: 2
+image:
+  repository: your-registry/blog-web
+  tag: "latest"
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  port: 80
+containerPort: 3000
+env:
+  NODE_ENV: production
+  NEXT_PUBLIC_SITE_URL: https://blog.example.com
+  AWS_REGION: us-east-1
+  S3_BUCKET: your-bucket
+  S3_PUBLIC_BASE_URL: https://cdn.example.com
+  S3_UPLOAD_PREFIX: uploads
+secrets:
+  DATABASE_URL: ""
+  AUTH_SECRET: ""
+  AWS_ACCESS_KEY_ID: ""
+  AWS_SECRET_ACCESS_KEY: ""
+ingress:
+  enabled: true
+  className: nginx
+  host: blog.example.com
+  tls:
+    enabled: true
+    secretName: blog-web-tls
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+serviceAccount:
+  create: true
+  name: ""
+  annotations:
+    eks.amazonaws.com/role-arn: ""
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
