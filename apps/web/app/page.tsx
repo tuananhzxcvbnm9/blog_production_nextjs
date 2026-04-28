@@ -106,14 +106,20 @@ export default async function HomePage({ searchParams }: { searchParams?: { topi
           <div className="rounded-3xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-lg font-semibold">Trending topics</h3>
-              <span className="text-xs text-blue-600">Xem tất cả</span>
+              <Link href="/" className="text-xs text-blue-600 hover:underline">
+                Xem tất cả
+              </Link>
             </div>
             <div className="space-y-2">
               {categories.map((category, idx) => (
-                <div key={category.id} className="flex items-center justify-between rounded-xl bg-zinc-50 px-3 py-2 text-sm dark:bg-zinc-800/60">
+                <Link
+                  key={category.id}
+                  href={`/?topic=${encodeURIComponent(category.name)}`}
+                  className="flex items-center justify-between rounded-xl bg-zinc-50 px-3 py-2 text-sm transition hover:bg-blue-50 dark:bg-zinc-800/60 dark:hover:bg-zinc-800"
+                >
                   <span className="text-zinc-600 dark:text-zinc-200">{String(idx + 1).padStart(2, '0')} · {category.name}</span>
                   <span className="font-semibold text-blue-600">{category._count.posts}</span>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
