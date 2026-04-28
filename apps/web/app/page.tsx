@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { PostCard } from '@/components/post-card';
@@ -16,10 +17,17 @@ const homePostSelect = Prisma.validator<Prisma.PostSelect>()({
   author: { select: { name: true, avatarUrl: true } }
 });
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: { searchParams?: { topic?: string } }) {
+  const topic = searchParams?.topic;
+  const selectedTopic = topic && topicPills.includes(topic) && topic !== 'Tất cả' ? topic : null;
+  const postWhere = {
+    status: 'PUBLISHED',
+    ...(selectedTopic ? { category: { name: selectedTopic } } : {})
+  } as const;
+
   const [featured, latest, categories, totalPosts, totalAuthors] = await Promise.all([
-    prisma.post.findMany({ where: { status: 'PUBLISHED', featured: true }, select: homePostSelect, orderBy: { publishedAt: 'desc' }, take: 4 }),
-    prisma.post.findMany({ where: { status: 'PUBLISHED' }, select: homePostSelect, orderBy: { publishedAt: 'desc' }, take: 12 }),
+    prisma.post.findMany({ where: { ...postWhere, featured: true }, select: homePostSelect, orderBy: { publishedAt: 'desc' }, take: 4 }),
+    prisma.post.findMany({ where: postWhere, select: homePostSelect, orderBy: { publishedAt: 'desc' }, take: 12 }),
     prisma.category.findMany({ include: { _count: { select: { posts: true } } }, orderBy: { posts: { _count: 'desc' } }, take: 6 }),
     prisma.post.count({ where: { status: 'PUBLISHED' } }),
     prisma.user.count()
@@ -40,18 +48,22 @@ export default async function HomePage() {
           <p className="max-w-2xl text-lg text-zinc-500 dark:text-zinc-300">Khám phá ý tưởng, xu hướng và tri thức mới nhất để bứt phá trong công việc mỗi ngày.</p>
 
           <div className="flex flex-wrap gap-3">
-            {topicPills.map((pill, idx) => (
-              <button
-                key={pill}
-                className={`rounded-2xl border px-4 py-2 text-sm font-medium transition ${
-                  idx === 0
-                    ? 'border-blue-200 bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-lg shadow-blue-500/20'
-                    : 'border-zinc-200 bg-white text-zinc-600 hover:border-blue-200 hover:text-blue-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300'
-                }`}
-              >
-                {pill}
-              </button>
-            ))}
+            {topicPills.map((pill) => {
+              const isActive = (pill === 'Tất cả' && !selectedTopic) || pill === selectedTopic;
+              return (
+                <Link
+                  key={pill}
+                  href={pill === 'Tất cả' ? '/' : `/?topic=${encodeURIComponent(pill)}`}
+                  className={`rounded-2xl border px-4 py-2 text-sm font-medium transition ${
+                    isActive
+                      ? 'border-blue-200 bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-lg shadow-blue-500/20'
+                      : 'border-zinc-200 bg-white text-zinc-600 hover:border-blue-200 hover:text-blue-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300'
+                  }`}
+                >
+                  {pill}
+                </Link>
+              );
+            })}
           </div>
         </div>
 
@@ -120,7 +132,7 @@ export default async function HomePage() {
 
       <section className="space-y-4">
         <h2 className="text-2xl font-bold">Bài viết mới nhất</h2>
-        <HomeFeed initialPosts={latest} />
+        <HomeFeed key={selectedTopic ?? 'all'} initialPosts={latest} categoryName={selectedTopic} />
       </section>
     </div>
   );
