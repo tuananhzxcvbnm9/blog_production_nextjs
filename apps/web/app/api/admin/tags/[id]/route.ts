@@ -1,16 +1,17 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/auth';
-import { tagSchema } from '@/lib/validators';
+import { parseJsonBody, tagSchema, toValidationError } from '@/lib/validators';
+import { handleAdminError } from '@/app/api/admin/_helpers';
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
     await requireRole(['ADMIN', 'EDITOR']);
-    const parsed = tagSchema.partial().safeParse(await req.json());
-    if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    const parsed = tagSchema.partial().safeParse(await parseJsonBody(req));
+    if (!parsed.success) return NextResponse.json(toValidationError(parsed.error), { status: 400 });
     return NextResponse.json(await prisma.tag.update({ where: { id: params.id }, data: parsed.data }));
-  } catch {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  } catch (error) {
+    return handleAdminError(error);
   }
 }
 
@@ -19,7 +20,7 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
     await requireRole(['ADMIN', 'EDITOR']);
     await prisma.tag.delete({ where: { id: params.id } });
     return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  } catch (error) {
+    return handleAdminError(error);
   }
 }

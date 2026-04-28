@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Header, Footer } from '@/components/layout';
-import { Toaster } from 'sonner';
+
+const Toaster = dynamic(() => import('sonner').then((mod) => mod.Toaster), { ssr: false });
 
 export const metadata: Metadata = {
   title: 'NOVA FLOW',

@@ -27,6 +27,7 @@ export function HeaderAuthActions() {
   const router = useRouter();
   const [state, setState] = useState<AuthState>({ status: 'loading' });
   const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -34,6 +35,11 @@ export function HeaderAuthActions() {
     async function loadSession() {
       try {
         const res = await fetch('/api/auth/me', { cache: 'no-store' });
+        if (res.status === 401) {
+          if (!active) return;
+          setState({ status: 'unauthenticated' });
+          return;
+        }
         if (!res.ok) throw new Error('Không thể tải phiên đăng nhập');
 
         const payload = (await res.json()) as { user?: SessionUser | null };
@@ -61,11 +67,15 @@ export function HeaderAuthActions() {
 
   const onLogout = async () => {
     setLoggingOut(true);
+    setLogoutError('');
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      const res = await fetch('/api/auth/logout', { method: 'POST' });
+      if (!res.ok) throw new Error('Không thể đăng xuất');
       setState({ status: 'unauthenticated' });
       router.push('/login');
       router.refresh();
+    } catch {
+      setLogoutError('Đăng xuất thất bại. Vui lòng thử lại.');
     } finally {
       setLoggingOut(false);
     }
@@ -110,6 +120,9 @@ export function HeaderAuthActions() {
 
   return (
     <div className="flex items-center gap-2">
+      {logoutError && (
+        <span className="hidden text-xs text-red-500 md:inline">{logoutError}</span>
+      )}
       <span className="hidden rounded-xl border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-600 md:inline-block dark:border-zinc-700 dark:text-zinc-300">
         {roleLabelMap[state.user.role]}
       </span>
