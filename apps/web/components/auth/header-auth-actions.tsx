@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { LogOut, PenLine, ShieldAlert } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 type SessionUser = {
@@ -25,6 +25,7 @@ const roleLabelMap: Record<SessionUser['role'], string> = {
 
 export function HeaderAuthActions() {
   const router = useRouter();
+  const pathname = usePathname();
   const [state, setState] = useState<AuthState>({ status: 'loading' });
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState('');
@@ -63,7 +64,7 @@ export function HeaderAuthActions() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [pathname]);
 
   const onLogout = async () => {
     setLoggingOut(true);
