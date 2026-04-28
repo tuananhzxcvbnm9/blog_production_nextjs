@@ -16,7 +16,7 @@ type Post = {
   author: { name: string };
 };
 
-export function HomeFeed({ initialPosts }: { initialPosts: Post[] }) {
+export function HomeFeed({ initialPosts, categoryName }: { initialPosts: Post[]; categoryName?: string | null }) {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [page, setPage] = useState(2);
   const [loading, setLoading] = useState(false);
@@ -39,7 +39,9 @@ export function HomeFeed({ initialPosts }: { initialPosts: Post[] }) {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`/api/posts?page=${pageRef.current}`, { cache: 'no-store' });
+      const params = new URLSearchParams({ page: String(pageRef.current) });
+      if (categoryName) params.set('category', categoryName);
+      const res = await fetch(`/api/posts?${params.toString()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error('Failed to load');
       const json = await res.json();
       setPosts((prev) => [...prev, ...(json.data ?? [])]);
@@ -51,7 +53,7 @@ export function HomeFeed({ initialPosts }: { initialPosts: Post[] }) {
       loadingRef.current = false;
       setLoading(false);
     }
-  }, []);
+  }, [categoryName]);
 
   useEffect(() => {
     const node = sentinelRef.current;
