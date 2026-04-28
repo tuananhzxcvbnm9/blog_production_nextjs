@@ -61,3 +61,38 @@ export const settingsPatchSchema = z.record(z.string().min(1).max(120), z.string
 export const paginationQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1)
 });
+
+export const searchQuerySchema = z.object({
+  q: z.string().max(200).default(''),
+  category: z.string().max(100).optional(),
+  tag: z.string().max(100).optional(),
+  page: z.coerce.number().int().min(1).default(1)
+});
+
+export const mediaPresignSchema = z.object({
+  filename: z.string().min(1),
+  mimeType: z.string().min(1),
+  size: z.number().int().positive()
+});
+
+export const mediaCompleteSchema = z.object({
+  key: z.string(),
+  url: z.string().url(),
+  filename: z.string(),
+  mimeType: z.string(),
+  size: z.number(),
+  width: z.number().optional(),
+  height: z.number().optional()
+});
+
+export async function parseJsonBody(req: Request): Promise<unknown> {
+  return req.json().catch(() => null);
+}
+
+export function toValidationError(error: z.ZodError) {
+  return {
+    error: 'Dữ liệu không hợp lệ',
+    code: 'VALIDATION_ERROR',
+    details: error.flatten()
+  };
+}

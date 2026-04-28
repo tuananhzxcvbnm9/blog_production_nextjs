@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
-import { registerSchema } from '@/lib/validators';
+import { parseJsonBody, registerSchema, toValidationError } from '@/lib/validators';
 
 export async function POST(req: Request) {
-  const parsed = registerSchema.safeParse(await req.json());
+  const parsed = registerSchema.safeParse(await parseJsonBody(req));
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Dữ liệu không hợp lệ' }, { status: 400 });
+    return NextResponse.json(toValidationError(parsed.error), { status: 400 });
   }
 
   const normalizedEmail = parsed.data.email.toLowerCase().trim();

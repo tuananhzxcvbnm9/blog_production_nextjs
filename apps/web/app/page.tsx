@@ -1,14 +1,25 @@
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { PostCard } from '@/components/post-card';
 import { HomeFeed } from '@/components/home/home-feed';
 import { Sparkles, TrendingUp, Users, BookOpenText } from 'lucide-react';
 
 const topicPills = ['Tất cả', 'AI', 'Công nghệ', 'Thiết kế', 'Productivity', 'Cloud & DevOps', 'Lifestyle', 'Startup'];
+const homePostSelect = Prisma.validator<Prisma.PostSelect>()({
+  id: true,
+  slug: true,
+  title: true,
+  excerpt: true,
+  coverImageUrl: true,
+  publishedAt: true,
+  category: { select: { name: true } },
+  author: { select: { name: true, avatarUrl: true } }
+});
 
 export default async function HomePage() {
   const [featured, latest, categories, totalPosts, totalAuthors] = await Promise.all([
-    prisma.post.findMany({ where: { status: 'PUBLISHED', featured: true }, include: { category: true, author: true }, orderBy: { publishedAt: 'desc' }, take: 4 }),
-    prisma.post.findMany({ where: { status: 'PUBLISHED' }, include: { category: true, author: true }, orderBy: { publishedAt: 'desc' }, take: 12 }),
+    prisma.post.findMany({ where: { status: 'PUBLISHED', featured: true }, select: homePostSelect, orderBy: { publishedAt: 'desc' }, take: 4 }),
+    prisma.post.findMany({ where: { status: 'PUBLISHED' }, select: homePostSelect, orderBy: { publishedAt: 'desc' }, take: 12 }),
     prisma.category.findMany({ include: { _count: { select: { posts: true } } }, orderBy: { posts: { _count: 'desc' } }, take: 6 }),
     prisma.post.count({ where: { status: 'PUBLISHED' } }),
     prisma.user.count()

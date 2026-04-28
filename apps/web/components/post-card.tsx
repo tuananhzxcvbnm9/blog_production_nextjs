@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Clock3, Bookmark } from 'lucide-react';
@@ -13,14 +14,20 @@ type Post = {
   publishedAt?: Date | string | null;
 };
 
-export function PostCard({ post }: { post: Post }) {
+function PostCardBase({ post }: { post: Post }) {
   const published = post.publishedAt ? new Date(post.publishedAt) : null;
 
   return (
     <article className="group overflow-hidden rounded-3xl border border-zinc-200/80 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="relative h-44 w-full overflow-hidden">
         {post.coverImageUrl ? (
-          <Image src={post.coverImageUrl} alt={post.title} fill className="object-cover transition duration-500 group-hover:scale-105" />
+          <Image
+            src={post.coverImageUrl}
+            alt={post.title}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+            className="object-cover transition duration-500 group-hover:scale-105"
+          />
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-blue-600 via-indigo-500 to-violet-600" />
         )}
@@ -56,3 +63,5 @@ export function PostCard({ post }: { post: Post }) {
     </article>
   );
 }
+
+export const PostCard = memo(PostCardBase);
