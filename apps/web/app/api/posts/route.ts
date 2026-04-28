@@ -39,13 +39,17 @@ const publicPostSelect = Prisma.validator<Prisma.PostSelect>()({
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
+  const category = searchParams.get('category') || undefined;
   const parsed = paginationQuerySchema.safeParse({ page: searchParams.get('page') ?? 1 });
   if (!parsed.success) return NextResponse.json(toValidationError(parsed.error), { status: 400 });
 
   const page = parsed.data.page;
   const pageSize = 12;
   const posts = await prisma.post.findMany({
-    where: { status: 'PUBLISHED' },
+    where: {
+      status: 'PUBLISHED',
+      ...(category ? { category: { name: category } } : {})
+    },
     select: publicPostSelect,
     orderBy: { publishedAt: 'desc' },
     skip: (page - 1) * pageSize,
