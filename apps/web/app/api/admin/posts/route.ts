@@ -1,28 +1,43 @@
 import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { postSchema } from '@/lib/validators';
+import { parseJsonBody, postSchema, toValidationError } from '@/lib/validators';
 import { requireRole } from '@/lib/auth';
+import { handleAdminError } from '@/app/api/admin/_helpers';
+
+const adminPostListSelect = Prisma.validator<Prisma.PostSelect>()({
+  id: true,
+  title: true,
+  slug: true,
+  status: true,
+  featured: true,
+  publishedAt: true,
+  createdAt: true,
+  updatedAt: true,
+  category: { select: { id: true, name: true, slug: true } },
+  author: { select: { id: true, name: true, email: true, role: true, status: true } },
+  tags: { select: { tag: { select: { id: true, name: true, slug: true } } } }
+});
 
 export async function GET() {
   try {
     await requireRole(['ADMIN', 'EDITOR']);
     const posts = await prisma.post.findMany({
-      include: { author: true, category: true, tags: { include: { tag: true } } },
+      select: adminPostListSelect,
       orderBy: { updatedAt: 'desc' }
     });
     return NextResponse.json(posts);
-  } catch {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  } catch (error) {
+    return handleAdminError(error);
   }
 }
 
 export async function POST(req: Request) {
   try {
     const session = await requireRole(['ADMIN', 'EDITOR']);
-    const parsed = postSchema.safeParse(await req.json());
+    const parsed = postSchema.safeParse(await parseJsonBody(req));
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+      return NextResponse.json(toValidationError(parsed.error), { status: 400 });
     }
     const { tagIds, publishedAt, ...payload } = parsed.data;
     const post = await prisma.post.create({
@@ -37,12 +52,9 @@ export async function POST(req: Request) {
     });
     return NextResponse.json(post, { status: 201 });
   } catch (error) {
-    if (error instanceof Error && error.message === 'FORBIDDEN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-      return NextResponse.json({ error: 'Slug đã tồn tại. Vui lòng đổi tiêu đề khác.' }, { status: 409 });
-    }
-    return NextResponse.json({ error: 'Không thể tạo bài viết. Vui lòng thử lại.' }, { status: 500 });
+    return handleAdminError(error, {
+      conflictMessage: 'Slug đã tồn tại. Vui lòng đổi tiêu đề khác.',
+      internalMessage: 'Không thể tạo bài viết. Vui lòng thử lại.'
+    });
   }
 }

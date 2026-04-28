@@ -1,22 +1,23 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/auth';
-import { settingsPatchSchema } from '@/lib/validators';
+import { parseJsonBody, settingsPatchSchema, toValidationError } from '@/lib/validators';
+import { handleAdminError } from '@/app/api/admin/_helpers';
 
 export async function GET() {
   try {
     await requireRole(['ADMIN', 'EDITOR']);
     return NextResponse.json(await prisma.setting.findMany());
-  } catch {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  } catch (error) {
+    return handleAdminError(error);
   }
 }
 
 export async function PATCH(req: Request) {
   try {
     await requireRole(['ADMIN']);
-    const parsed = settingsPatchSchema.safeParse(await req.json());
-    if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    const parsed = settingsPatchSchema.safeParse(await parseJsonBody(req));
+    if (!parsed.success) return NextResponse.json(toValidationError(parsed.error), { status: 400 });
 
     await Promise.all(
       Object.entries(parsed.data).map(([key, value]) =>
@@ -29,7 +30,7 @@ export async function PATCH(req: Request) {
     );
 
     return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  } catch (error) {
+    return handleAdminError(error);
   }
 }

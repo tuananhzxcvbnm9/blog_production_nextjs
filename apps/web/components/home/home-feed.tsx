@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { PostCard } from '@/components/post-card';
 
@@ -23,13 +23,23 @@ export function HomeFeed({ initialPosts }: { initialPosts: Post[] }) {
   const [error, setError] = useState('');
   const [hasMore, setHasMore] = useState(true);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const loadingRef = useRef(false);
+  const hasMoreRef = useRef(true);
+  const pageRef = useRef(2);
 
-  const loadMore = async () => {
-    if (loading || !hasMore) return;
+  useEffect(() => {
+    loadingRef.current = loading;
+    hasMoreRef.current = hasMore;
+    pageRef.current = page;
+  }, [loading, hasMore, page]);
+
+  const loadMore = useCallback(async () => {
+    if (loadingRef.current || !hasMoreRef.current) return;
+    loadingRef.current = true;
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`/api/posts?page=${page}`, { cache: 'no-store' });
+      const res = await fetch(`/api/posts?page=${pageRef.current}`, { cache: 'no-store' });
       if (!res.ok) throw new Error('Failed to load');
       const json = await res.json();
       setPosts((prev) => [...prev, ...(json.data ?? [])]);
@@ -38,9 +48,10 @@ export function HomeFeed({ initialPosts }: { initialPosts: Post[] }) {
     } catch {
       setError('Không thể tải thêm bài viết. Vui lòng thử lại.');
     } finally {
+      loadingRef.current = false;
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const node = sentinelRef.current;
@@ -55,7 +66,7 @@ export function HomeFeed({ initialPosts }: { initialPosts: Post[] }) {
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [page, hasMore, loading]);
+  }, [loadMore]);
 
   const skeletons = useMemo(() => Array.from({ length: 3 }), []);
 
@@ -66,8 +77,8 @@ export function HomeFeed({ initialPosts }: { initialPosts: Post[] }) {
   return (
     <div className="space-y-6">
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {posts.map((post, idx) => (
-          <motion.div key={`${post.id}-${idx}`} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
+        {posts.map((post) => (
+          <motion.div key={post.id} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
             <PostCard post={post} />
           </motion.div>
         ))}

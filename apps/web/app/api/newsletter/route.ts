@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { toValidationError } from '@/lib/validators';
 
 const schema = z.object({ email: z.string().email() });
 
@@ -15,7 +16,7 @@ export async function POST(req: Request) {
   }
 
   const parsed = schema.safeParse(payload);
-  if (!parsed.success) return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
+  if (!parsed.success) return NextResponse.json(toValidationError(parsed.error), { status: 400 });
 
   return NextResponse.json({ ok: true, subscribedAt: new Date().toISOString() });
 }
