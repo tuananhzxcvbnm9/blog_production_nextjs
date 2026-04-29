@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { toValidationError } from '@/lib/validators';
+import { prisma } from '@/lib/prisma';
 
 const schema = z.object({ email: z.string().email() });
 
@@ -18,5 +19,11 @@ export async function POST(req: Request) {
   const parsed = schema.safeParse(payload);
   if (!parsed.success) return NextResponse.json(toValidationError(parsed.error), { status: 400 });
 
-  return NextResponse.json({ ok: true, subscribedAt: new Date().toISOString() });
+  const newsletter = await prisma.newsletter.upsert({
+    where: { email: parsed.data.email },
+    update: {},
+    create: { email: parsed.data.email }
+  });
+
+  return NextResponse.json({ ok: true, subscribedAt: newsletter.createdAt.toISOString() });
 }

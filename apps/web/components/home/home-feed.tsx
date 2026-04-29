@@ -1,20 +1,12 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { PostCard } from '@/components/post-card';
 
-type Post = {
-  id: string;
-  slug: string;
-  title: string;
-  excerpt: string;
-  coverImageUrl?: string | null;
-  publishedAt?: Date | string | null;
-  category: { name: string };
-  author: { name: string };
-};
+import type { PublicPost } from '@/lib/queries';
+
+type Post = PublicPost & { readingTime?: number };
 
 export function HomeFeed({ initialPosts, categoryName }: { initialPosts: Post[]; categoryName?: string | null }) {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
@@ -80,9 +72,9 @@ export function HomeFeed({ initialPosts, categoryName }: { initialPosts: Post[];
     <div className="space-y-6">
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {posts.map((post) => (
-          <motion.div key={post.id} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
+          <div key={post.id} className="animate-fade-in-up">
             <PostCard post={post} />
-          </motion.div>
+          </div>
         ))}
       </div>
 

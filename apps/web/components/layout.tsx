@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 import { HeaderAuthActions } from './auth/header-auth-actions';
+import { MobileMenu } from './mobile-menu';
 
 const navItems = [
   { href: '/', label: 'Khám phá' },
@@ -26,15 +27,17 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="ml-auto hidden items-center gap-2 rounded-2xl border border-blue-100 bg-white/90 px-3 py-2 md:flex dark:border-zinc-800 dark:bg-zinc-900">
+        <form action="/search" method="GET" className="ml-auto hidden items-center gap-2 rounded-2xl border border-blue-100 bg-white/90 px-3 py-2 md:flex dark:border-zinc-800 dark:bg-zinc-900">
           <Search size={16} className="text-zinc-400" />
           <input
             aria-label="Search"
+            name="q"
             className="w-56 bg-transparent text-sm outline-none placeholder:text-zinc-400"
             placeholder="Tìm bài viết, chủ đề..."
           />
-        </div>
+        </form>
 
+        <MobileMenu navItems={navItems} />
         <ThemeToggle />
         <HeaderAuthActions />
       </div>
@@ -53,10 +56,10 @@ export function Footer() {
         <div className="text-sm text-zinc-500">
           <p className="mb-2 font-semibold text-zinc-700 dark:text-zinc-200">Quick links</p>
           <div className="space-y-1">
-            <p>Home</p>
-            <p>Categories</p>
-            <p>Authors</p>
-            <p>Newsletter</p>
+            <Link href="/" className="block transition hover:text-blue-600">Home</Link>
+            <Link href="/categories/engineering" className="block transition hover:text-blue-600">Categories</Link>
+            <Link href="/about" className="block transition hover:text-blue-600">About</Link>
+            <Link href="/search" className="block transition hover:text-blue-600">Search</Link>
           </div>
         </div>
         <div className="text-sm text-zinc-500">

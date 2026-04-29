@@ -5,6 +5,7 @@ import { Clock3, Bookmark } from 'lucide-react';
 import { format } from 'date-fns';
 
 type Post = {
+  readingTime?: number;
   slug: string;
   title: string;
   excerpt: string;
@@ -55,7 +56,7 @@ function PostCardBase({ post }: { post: Post }) {
           </div>
           <div className="flex items-center gap-2">
             <Clock3 size={12} />
-            <span>5 phút đọc</span>
+            <span>{post.readingTime ?? 5} phút đọc</span>
             <Bookmark size={13} />
           </div>
         </div>
