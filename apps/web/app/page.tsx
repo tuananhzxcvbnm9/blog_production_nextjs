@@ -1,21 +1,12 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
 import { PostCard } from '@/components/post-card';
+import { publicPostSelect } from '@/lib/queries';
+import { getReadingTime } from '@/lib/reading-time';
 import { HomeFeed } from '@/components/home/home-feed';
 import { Sparkles, TrendingUp, Users, BookOpenText } from 'lucide-react';
 
 const topicPills = ['Tất cả', 'AI', 'Công nghệ', 'Thiết kế', 'Productivity', 'Cloud & DevOps', 'Lifestyle', 'Startup'];
-const homePostSelect = Prisma.validator<Prisma.PostSelect>()({
-  id: true,
-  slug: true,
-  title: true,
-  excerpt: true,
-  coverImageUrl: true,
-  publishedAt: true,
-  category: { select: { name: true } },
-  author: { select: { name: true, avatarUrl: true } }
-});
 
 export default async function HomePage({ searchParams }: { searchParams?: { topic?: string } }) {
   const topic = searchParams?.topic;
@@ -25,15 +16,19 @@ export default async function HomePage({ searchParams }: { searchParams?: { topi
     ...(selectedTopic ? { category: { name: selectedTopic } } : {})
   } as const;
 
-  const [featured, latest, categories, totalPosts, totalAuthors] = await Promise.all([
-    prisma.post.findMany({ where: { ...postWhere, featured: true }, select: homePostSelect, orderBy: { publishedAt: 'desc' }, take: 4 }),
-    prisma.post.findMany({ where: postWhere, select: homePostSelect, orderBy: { publishedAt: 'desc' }, take: 12 }),
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const [featured, latestRaw, categories, totalPosts, totalAuthors, weeklyViews] = await Promise.all([
+    prisma.post.findMany({ where: { ...postWhere, featured: true }, select: publicPostSelect, orderBy: { publishedAt: 'desc' }, take: 4 }),
+    prisma.post.findMany({ where: postWhere, select: publicPostSelect, orderBy: { publishedAt: 'desc' }, take: 12 }),
     prisma.category.findMany({ include: { _count: { select: { posts: true } } }, orderBy: { posts: { _count: 'desc' } }, take: 6 }),
     prisma.post.count({ where: { status: 'PUBLISHED' } }),
-    prisma.user.count()
+    prisma.user.count(),
+    prisma.postView.count({ where: { createdAt: { gte: weekAgo } } })
   ]);
 
-  const heroFeatured = featured[0] ?? latest[0];
+  const featuredWithReading = featured.map((post) => ({ ...post, readingTime: getReadingTime(post.content) }));
+  const latest = latestRaw.map((post) => ({ ...post, readingTime: getReadingTime(post.content) }));
+  const heroFeatured = featuredWithReading[0] ?? latest[0];
 
   return (
     <div className="space-y-8 pb-12">
@@ -72,16 +67,16 @@ export default async function HomePage({ searchParams }: { searchParams?: { topi
             <div className="rounded-2xl border border-zinc-200/80 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900">
               <p className="text-xs text-zinc-500">Bài viết</p>
               <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">{totalPosts}</p>
-              <p className="mt-2 inline-flex items-center gap-1 text-xs text-emerald-600"><TrendingUp size={12} /> +18%</p>
+              <p className="mt-2 inline-flex items-center gap-1 text-xs text-emerald-600"><TrendingUp size={12} /> </p>
             </div>
             <div className="rounded-2xl border border-zinc-200/80 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900">
               <p className="text-xs text-zinc-500">Authors</p>
               <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">{totalAuthors}</p>
-              <p className="mt-2 inline-flex items-center gap-1 text-xs text-blue-600"><Users size={12} /> Active</p>
+              <p className="mt-2 inline-flex items-center gap-1 text-xs text-blue-600"><Users size={12} /> Đang hoạt động</p>
             </div>
             <div className="rounded-2xl border border-zinc-200/80 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900">
               <p className="text-xs text-zinc-500">Tuần này</p>
-              <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">256K</p>
+              <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">{weeklyViews}</p>
               <p className="mt-2 inline-flex items-center gap-1 text-xs text-violet-600"><BookOpenText size={12} /> Lượt đọc</p>
             </div>
           </div>
@@ -99,7 +94,7 @@ export default async function HomePage({ searchParams }: { searchParams?: { topi
       <section className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">Bài viết nổi bật</h2>
-          <div className="grid gap-5 md:grid-cols-2">{featured.slice(0, 4).map((post) => <PostCard key={post.id} post={post} />)}</div>
+          <div className="grid gap-5 md:grid-cols-2">{featuredWithReading.slice(0, 4).map((post) => <PostCard key={post.id} post={post} />)}</div>
         </div>
 
         <aside className="space-y-4">

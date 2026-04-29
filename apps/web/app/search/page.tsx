@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 
@@ -6,6 +7,14 @@ const searchResultSelect = Prisma.validator<Prisma.PostSelect>()({
   slug: true,
   title: true
 });
+
+export async function generateMetadata({ searchParams }: { searchParams: { q?: string } }): Promise<Metadata> {
+  const q = (searchParams.q || '').trim();
+  const title = `Search${q ? `: ${q}` : ''} — NOVA FLOW`;
+  const description = q ? `Search results for ${q}` : 'Search posts on NOVA FLOW';
+
+  return { title, description, openGraph: { title, description } };
+}
 
 export default async function SearchPage({ searchParams }: { searchParams: { q?: string } }) {
   const q = (searchParams.q || '').trim();
@@ -24,7 +33,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
   return (
     <div>
       <h1 className="text-3xl font-bold">Search</h1>
-      <form className="my-4">
+      <form action="/search" method="GET" className="my-4">
         <input
           name="q"
           defaultValue={q}

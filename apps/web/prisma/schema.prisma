@@ -134,3 +134,11 @@ model PostView {
 
   @@index([postId, createdAt])
 }
+
+model Newsletter {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}

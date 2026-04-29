@@ -1,41 +1,8 @@
 import { NextResponse } from 'next/server';
-import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { paginationQuerySchema, toValidationError } from '@/lib/validators';
-
-const publicPostSelect = Prisma.validator<Prisma.PostSelect>()({
-  id: true,
-  slug: true,
-  title: true,
-  excerpt: true,
-  coverImageUrl: true,
-  publishedAt: true,
-  category: {
-    select: {
-      id: true,
-      name: true,
-      slug: true
-    }
-  },
-  author: {
-    select: {
-      id: true,
-      name: true,
-      avatarUrl: true
-    }
-  },
-  tags: {
-    select: {
-      tag: {
-        select: {
-          id: true,
-          name: true,
-          slug: true
-        }
-      }
-    }
-  }
-});
+import { getReadingTime } from '@/lib/reading-time';
+import { publicPostSelect } from '@/lib/queries';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -57,5 +24,8 @@ export async function GET(req: Request) {
   });
 
   const hasMore = posts.length > pageSize;
-  return NextResponse.json({ data: hasMore ? posts.slice(0, pageSize) : posts, nextPage: hasMore ? page + 1 : null });
+  const data = (hasMore ? posts.slice(0, pageSize) : posts).map((post) => ({ ...post, readingTime: getReadingTime(post.content) }));
+  return NextResponse.json({ data, nextPage: hasMore ? page + 1 : null }, {
+    headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' }
+  });
 }
